@@ -35,8 +35,16 @@
   .ring-dot{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#f5c842;box-shadow:0 0 12px #f5c842;}
   canvas{transition:filter .4s;}
   .hint{text-align:center;color:rgba(245,200,66,0.35);font-size:10px;letter-spacing:2px;margin-bottom:8px;min-height:16px;}
-  .mic-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0 10px;}
+  .mic-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 0 10px;}
   .mic-label{color:rgba(248,113,113,0.7);font-size:9px;letter-spacing:2px;}
+  /* File upload area */
+  .file-bar{display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap;}
+  .file-btn{background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.25);border-radius:8px;padding:6px 12px;color:rgba(245,200,66,0.7);font-size:10px;cursor:pointer;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px;transition:all .2s;}
+  .file-btn:hover{background:rgba(245,200,66,0.15);color:#f5c842;}
+  .file-chip{background:rgba(245,200,66,0.12);border:1px solid rgba(245,200,66,0.3);border-radius:6px;padding:3px 8px;font-size:10px;color:#f5c842;display:flex;align-items:center;gap:5px;}
+  .file-chip span{cursor:pointer;opacity:.6;}
+  .file-chip span:hover{opacity:1;}
+  #file-input{display:none;}
   .chat-panel{background:rgba(10,15,28,0.88);border:1px solid rgba(245,200,66,0.18);border-radius:16px;display:flex;flex-direction:column;height:300px;}
   .messages{flex:1;overflow-y:auto;padding:14px;}
   .messages::-webkit-scrollbar{width:4px;}
@@ -57,6 +65,7 @@
   #text-input:focus{outline:none;border-color:rgba(245,200,66,0.5);}
   .send-btn{width:44px;height:44px;border-radius:10px;border:1px solid #f5c842;background:linear-gradient(135deg,rgba(245,200,66,0.3),rgba(245,200,66,0.1));color:#f5c842;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .send-btn:disabled{opacity:.35;cursor:not-allowed;}
+  .stop-btn{width:44px;height:44px;border-radius:10px;border:1px solid #f87171;background:rgba(248,113,113,0.15);color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;display:none;}
   .voice-toggle{background:none;border:1px solid rgba(245,200,66,0.2);border-radius:6px;padding:3px 9px;color:rgba(245,200,66,0.5);font-size:9px;cursor:pointer;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
   .voice-toggle.on{color:#f5c842;border-color:rgba(245,200,66,0.5);}
   .footer{color:rgba(245,200,66,0.15);font-size:8px;letter-spacing:3px;text-align:center;padding:12px 0 20px;font-family:'Orbitron',monospace;}
@@ -104,6 +113,13 @@
     <span class="mic-label" id="mic-label">🎙️ PRONTO</span>
   </div>
 
+  <!-- File upload -->
+  <div class="file-bar" id="file-bar" style="display:none;">
+    <button class="file-btn" onclick="document.getElementById('file-input').click()">📎 CARICA FILE KUROKAI</button>
+    <input type="file" id="file-input" accept=".txt,.pdf,.md" multiple onchange="handleFiles(event)" />
+    <div id="file-chips"></div>
+  </div>
+
   <div class="chat-panel">
     <div class="messages" id="messages">
       <div class="bubble-wrap assistant">
@@ -114,9 +130,10 @@
     <div class="input-area">
       <textarea id="text-input" rows="1" placeholder="Scrivi a JARVIS o parla direttamente..." onkeydown="handleKey(event)" disabled></textarea>
       <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>⚡</button>
+      <button class="stop-btn" id="stop-btn" onclick="stopJarvis()" title="Interrompi">⏹</button>
     </div>
   </div>
-  <div class="footer">POWERED BY CLAUDE + OPENAI ONYX · NEURAL CORE v3.1 · ANDREA SYSTEMS</div>
+  <div class="footer">POWERED BY CLAUDE + OPENAI ONYX · NEURAL CORE v3.2 · ANDREA SYSTEMS</div>
 </div>
 
 <script>
@@ -127,8 +144,11 @@ let status = 'idle';
 let voiceEnabled = true;
 let isProcessing = false;
 let recognition = null;
+let currentAudio = null;
+let keepAliveCtx = null;
+let uploadedFiles = {}; // filename -> text content
 
-const SYSTEM_PROMPT = `Sei JARVIS, l'assistente AI personale di Andrea. Parli in italiano. Sei ispirato all'AI di Iron Man: preciso, intelligente, leggermente formale ma caldo, con un tocco di ironia britannica. Chiama Andrea "Sir" ogni tanto.
+const SYSTEM_BASE = `Sei JARVIS, l'assistente AI personale di Andrea. Parli in italiano. Sei ispirato all'AI di Iron Man: preciso, intelligente, leggermente formale ma caldo, con un tocco di ironia britannica. Chiama sempre Andrea per nome, mai "Sir".
 
 Puoi aiutare Andrea con:
 - Creare prompt dettagliati per le pagine del suo manga KUROKAI (progetto originale con personaggi Nova, Iris, Kairo, Yuna, Yue e il gatto nero Kuro dagli occhi viola)
@@ -137,6 +157,14 @@ Puoi aiutare Andrea con:
 - Qualsiasi domanda quotidiana, creatività, brainstorming, analisi
 
 Rispondi SEMPRE in italiano. Per risposte vocali sii conciso (max 3-4 frasi). Scrivi contenuti lunghi solo se esplicitamente richiesto.`;
+
+function getSystemPrompt() {
+  if (Object.keys(uploadedFiles).length === 0) return SYSTEM_BASE;
+  const filesContext = Object.entries(uploadedFiles)
+    .map(([name, content]) => `\n\n--- FILE: ${name} ---\n${content.substring(0, 8000)}`)
+    .join('');
+  return SYSTEM_BASE + '\n\nCONTENUTO DEI FILE CARICATI DA ANDREA:' + filesContext;
+}
 
 initSphere();
 if (anthropicKey && openaiKey) activateJarvis();
@@ -162,11 +190,26 @@ function activateJarvis() {
   document.getElementById('send-btn').disabled = false;
   document.getElementById('text-input').disabled = false;
   document.getElementById('mic-bar').style.display = 'flex';
+  document.getElementById('file-bar').style.display = 'flex';
   setStatus('online');
   setHint('JARVIS ATTIVO — PARLA LIBERAMENTE');
   addMessage('assistant', 'Sistema attivato, Sir. Sono JARVIS. Posso aiutarti con KUROKAI, trovare lavoro, o qualsiasi cosa tu abbia in mente. Come posso assisterti?');
   speak('Sistema attivato, Sir. Sono JARVIS. Come posso assisterti?');
+  startKeepAlive();
   startListening();
+}
+
+// ─── Keep-alive audio (evita che Chrome spenga il mic) ────────────────────
+function startKeepAlive() {
+  try {
+    keepAliveCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = keepAliveCtx.createOscillator();
+    const gainNode = keepAliveCtx.createGain();
+    gainNode.gain.value = 0; // silenzioso
+    oscillator.connect(gainNode);
+    gainNode.connect(keepAliveCtx.destination);
+    oscillator.start();
+  } catch(e) {}
 }
 
 function setStatus(s) {
@@ -179,14 +222,72 @@ function setStatus(s) {
   txt.textContent = map[s]||'ONLINE';
   txt.style.color = colors[s]||'#4ade80';
   const ml = document.getElementById('mic-label');
-  if (ml) {
-    const mlmap = {online:'🎙️ PRONTO',listening:'🔴 IN ASCOLTO',thinking:'⚡ ELABORO...',speaking:'🔊 RISPONDO'};
-    ml.textContent = mlmap[s]||'🎙️ PRONTO';
+  if(ml){const mlmap={online:'🎙️ PRONTO',listening:'🔴 IN ASCOLTO',thinking:'⚡ ELABORO...',speaking:'🔊 RISPONDO'};ml.textContent=mlmap[s]||'🎙️ PRONTO';}
+  // Mostra/nascondi stop button
+  const stopBtn = document.getElementById('stop-btn');
+  const sendBtn = document.getElementById('send-btn');
+  if(s === 'speaking' || s === 'thinking') {
+    stopBtn.style.display = 'flex'; sendBtn.style.display = 'none';
+  } else {
+    stopBtn.style.display = 'none'; sendBtn.style.display = 'flex';
   }
 }
 
-function setHint(t) { document.getElementById('hint').textContent = t; }
+function setHint(t){document.getElementById('hint').textContent=t;}
 
+// ─── Stop JARVIS ──────────────────────────────────────────────────────────
+function stopJarvis() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  window.speechSynthesis?.cancel();
+  isProcessing = false;
+  setStatus('online');
+  startListening();
+  addMessage('assistant', '— Interrotto.');
+}
+
+// ─── File handling ────────────────────────────────────────────────────────
+async function handleFiles(event) {
+  const files = Array.from(event.target.files);
+  for (const file of files) {
+    if (file.type === 'application/pdf') {
+      // Leggi PDF come testo base (senza librerie esterne)
+      const text = await readFileAsText(file);
+      uploadedFiles[file.name] = text;
+    } else {
+      const text = await readFileAsText(file);
+      uploadedFiles[file.name] = text;
+    }
+    renderFileChip(file.name);
+  }
+  addMessage('assistant', `File caricato: ${files.map(f=>f.name).join(', ')}. Ho accesso al contenuto, Sir.`);
+  event.target.value = '';
+}
+
+function readFileAsText(file) {
+  return new Promise((res) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.onerror = () => res('');
+    reader.readAsText(file);
+  });
+}
+
+function renderFileChip(name) {
+  const chips = document.getElementById('file-chips');
+  const chip = document.createElement('div');
+  chip.className = 'file-chip';
+  chip.id = 'chip-' + name;
+  chip.innerHTML = `📄 ${name.length > 15 ? name.substring(0,15)+'...' : name} <span onclick="removeFile('${name}')">✕</span>`;
+  chips.appendChild(chip);
+}
+
+function removeFile(name) {
+  delete uploadedFiles[name];
+  const chip = document.getElementById('chip-' + name);
+  if(chip) chip.remove();
+}
+
+// ─── Messages ─────────────────────────────────────────────────────────────
 function addMessage(role, content) {
   messages.push({role, content});
   const c = document.getElementById('messages');
@@ -197,17 +298,11 @@ function addMessage(role, content) {
     : `<div class="bubble user">${escHtml(content)}</div>`;
   c.appendChild(w); c.scrollTop = c.scrollHeight;
 }
+function showTyping(){const c=document.getElementById('messages');const w=document.createElement('div');w.className='bubble-wrap assistant';w.id='typing-indicator';w.innerHTML='<div class="avatar">J</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';c.appendChild(w);c.scrollTop=c.scrollHeight;}
+function hideTyping(){const e=document.getElementById('typing-indicator');if(e)e.remove();}
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 
-function showTyping() {
-  const c = document.getElementById('messages');
-  const w = document.createElement('div');
-  w.className='bubble-wrap assistant'; w.id='typing-indicator';
-  w.innerHTML='<div class="avatar">J</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  c.appendChild(w); c.scrollTop=c.scrollHeight;
-}
-function hideTyping() { const e=document.getElementById('typing-indicator'); if(e)e.remove(); }
-function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
-
+// ─── Send ─────────────────────────────────────────────────────────────────
 async function sendMessage(voiceText) {
   const input = document.getElementById('text-input');
   const text = (voiceText || input.value).trim();
@@ -219,112 +314,105 @@ async function sendMessage(voiceText) {
   showTyping();
 
   try {
-    // Chiama Claude
     let res;
-    const body = JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1024,system:SYSTEM_PROMPT,messages:messages.slice(-20)});
+    const body = JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1024,system:getSystemPrompt(),messages:messages.slice(-20)});
     const headers = {'Content-Type':'application/json','x-api-key':anthropicKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
     try {
-      res = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers, body});
+      res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body});
     } catch(e) {
-      res = await fetch('https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'), {method:'POST', headers, body});
+      res = await fetch('https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'),{method:'POST',headers,body});
     }
     const data = await res.json();
     hideTyping();
-    if (data.error) { addMessage('assistant','⚠️ '+data.error.message); isProcessing=false; setStatus('online'); startListening(); return; }
-    const reply = data.content?.[0]?.text || 'Nessuna risposta.';
+    if(data.error){addMessage('assistant','⚠️ '+data.error.message);isProcessing=false;setStatus('online');startListening();return;}
+    const reply = data.content?.[0]?.text||'Nessuna risposta.';
     addMessage('assistant', reply);
     setStatus('speaking');
     await speak(reply);
   } catch(err) {
     hideTyping();
     addMessage('assistant','⚠️ Errore: '+err.message);
-    isProcessing=false; setStatus('online'); startListening();
+    isProcessing=false;setStatus('online');startListening();
   }
 }
 
-function handleKey(e) {
-  if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
 
-// ─── OpenAI TTS (voce Onyx) ───────────────────────────────────────────────
+// ─── OpenAI TTS ───────────────────────────────────────────────────────────
 async function speak(text) {
-  if (!voiceEnabled) { isProcessing=false; setStatus('online'); startListening(); return; }
+  if(!voiceEnabled){isProcessing=false;setStatus('online');startListening();return;}
   const clean = text.replace(/<br>/g,' ').replace(/[⚠️]/g,'').trim();
-  const toSpeak = clean.length > 500 ? clean.substring(0,500)+'.' : clean;
-
+  const toSpeak = clean.length>600?clean.substring(0,600)+'.':clean;
   try {
-    const res = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+openaiKey},
-      body: JSON.stringify({
-        model: 'tts-1',
-        input: toSpeak,
-        voice: 'onyx',   // Voce maschile profonda
-        speed: 1.0       // Velocità naturale
-      })
+    const res = await fetch('https://api.openai.com/v1/audio/speech',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+openaiKey},
+      body:JSON.stringify({model:'tts-1',input:toSpeak,voice:'onyx',speed:1.0})
     });
-    if (!res.ok) throw new Error('OpenAI TTS error '+res.status);
+    if(!res.ok) throw new Error('TTS error '+res.status);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.onended = () => { URL.revokeObjectURL(url); isProcessing=false; setStatus('online'); startListening(); };
-    audio.onerror = () => { isProcessing=false; setStatus('online'); startListening(); };
-    audio.play();
+    currentAudio = new Audio(url);
+    currentAudio.onended = ()=>{URL.revokeObjectURL(url);currentAudio=null;isProcessing=false;setStatus('online');startListening();};
+    currentAudio.onerror = ()=>{currentAudio=null;isProcessing=false;setStatus('online');startListening();};
+    currentAudio.play();
   } catch(err) {
-    // Fallback browser TTS
-    console.warn('Fallback browser TTS');
     const synth = window.speechSynthesis;
     synth.cancel();
     const utter = new SpeechSynthesisUtterance(toSpeak);
-    utter.lang='it-IT'; utter.rate=1.0; utter.pitch=0.8;
-    const voices = synth.getVoices();
-    const v = voices.find(v=>v.lang==='it-IT')||null;
-    if(v) utter.voice=v;
-    utter.onend = ()=>{ isProcessing=false; setStatus('online'); startListening(); };
+    utter.lang='it-IT';utter.rate=1.0;utter.pitch=0.8;
+    const voices=synth.getVoices();
+    const v=voices.find(v=>v.lang==='it-IT')||null;
+    if(v)utter.voice=v;
+    utter.onend=()=>{isProcessing=false;setStatus('online');startListening();};
     synth.speak(utter);
   }
 }
 
-function toggleVoice() {
-  voiceEnabled = !voiceEnabled;
-  const btn = document.getElementById('voice-toggle');
-  btn.textContent = voiceEnabled ? '🔊 VOCE ON' : '🔇 VOCE OFF';
-  btn.className = 'voice-toggle '+(voiceEnabled?'on':'');
+function toggleVoice(){
+  voiceEnabled=!voiceEnabled;
+  const btn=document.getElementById('voice-toggle');
+  btn.textContent=voiceEnabled?'🔊 VOCE ON':'🔇 VOCE OFF';
+  btn.className='voice-toggle '+(voiceEnabled?'on':'');
 }
 
-// ─── Always-on mic ────────────────────────────────────────────────────────
+// ─── Always-on mic con keep-alive ─────────────────────────────────────────
 function startListening() {
-  if (isProcessing) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { setHint('⚠️ Microfono richiede Chrome'); return; }
-  if (recognition) { try { recognition.stop(); } catch(e){} }
+  if(isProcessing) return;
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setHint('⚠️ Microfono richiede Chrome');return;}
+  if(recognition){try{recognition.abort();}catch(e){}}
 
   recognition = new SR();
   recognition.lang = 'it-IT';
   recognition.continuous = false;
   recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
 
-  recognition.onstart = () => { if (!isProcessing) setStatus('listening'); };
+  recognition.onstart = ()=>{ if(!isProcessing) setStatus('listening'); };
 
-  recognition.onresult = (e) => {
+  recognition.onresult = (e)=>{
     const t = e.results[0][0].transcript.trim();
-    if (t && !isProcessing) sendMessage(t);
+    if(t && !isProcessing) sendMessage(t);
   };
 
-  recognition.onerror = (e) => {
-    if (e.error==='not-allowed') { setHint('⚠️ Abilita microfono: clicca 🔒 nella barra URL → Microfono → Consenti'); return; }
-    if (!isProcessing) setTimeout(()=>startListening(), 1000);
+  recognition.onerror = (e)=>{
+    if(e.error==='not-allowed'){setHint('⚠️ Abilita microfono: clicca 🔒 URL → Microfono → Consenti');return;}
+    if(!isProcessing) setTimeout(()=>startListening(), 800);
   };
 
-  recognition.onend = () => {
-    if (!isProcessing) setTimeout(()=>startListening(), 400);
+  recognition.onend = ()=>{
+    if(!isProcessing) setTimeout(()=>startListening(), 300);
   };
 
-  try { recognition.start(); } catch(e) { setTimeout(()=>startListening(),1000); }
+  // Resume AudioContext se sospeso (keep-alive)
+  if(keepAliveCtx && keepAliveCtx.state === 'suspended') keepAliveCtx.resume();
+
+  try { recognition.start(); } catch(e){ setTimeout(()=>startListening(),1000); }
 }
 
 // ─── Sphere ───────────────────────────────────────────────────────────────
-function initSphere() {
+function initSphere(){
   const canvas=document.getElementById('sphere');
   const ctx=canvas.getContext('2d');
   const W=280,H=280,cx=140,cy=140,R=95,N=88;
@@ -366,6 +454,9 @@ function initSphere() {
   };
   draw();
 }
+
+// Resume AudioContext on user interaction
+document.addEventListener('click', ()=>{ if(keepAliveCtx&&keepAliveCtx.state==='suspended') keepAliveCtx.resume(); });
 </script>
 </body>
 </html>
