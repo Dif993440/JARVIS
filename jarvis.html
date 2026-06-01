@@ -19,7 +19,7 @@
   .status-dot-wrap{display:flex;align-items:center;gap:7px;}
   .status-dot{width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;transition:all .3s;}
   .status-dot.thinking{background:#f5c842;box-shadow:0 0 8px #f5c842;animation:pulse 1.2s infinite;}
-  .status-dot.listening{background:#f87171;box-shadow:0 0 8px #f87171;animation:pulse 1.2s infinite;}
+  .status-dot.recording{background:#f87171;box-shadow:0 0 8px #f87171;animation:pulse 1.2s infinite;}
   .status-dot.speaking{background:#60a5fa;box-shadow:0 0 8px #60a5fa;animation:pulse 1.2s infinite;}
   .status-text{font-size:10px;letter-spacing:2px;color:#4ade80;transition:color .3s;}
   #setup-panel{background:rgba(10,15,28,0.9);border:1px solid rgba(245,200,66,0.25);border-radius:16px;padding:24px;margin-bottom:20px;}
@@ -35,17 +35,23 @@
   .ring-dot{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#f5c842;box-shadow:0 0 12px #f5c842;}
   canvas{transition:filter .4s;}
   .hint{text-align:center;color:rgba(245,200,66,0.35);font-size:10px;letter-spacing:2px;margin-bottom:8px;min-height:16px;}
-  .mic-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 0 10px;}
-  .mic-label{color:rgba(248,113,113,0.7);font-size:9px;letter-spacing:2px;}
-  /* File upload area */
+  /* MIC BUTTON BIG */
+  .mic-section{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 0 14px;}
+  .mic-big{width:72px;height:72px;border-radius:50%;border:2px solid rgba(245,200,66,0.4);background:rgba(245,200,66,0.07);color:#f5c842;font-size:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;}
+  .mic-big:hover{background:rgba(245,200,66,0.15);border-color:#f5c842;}
+  .mic-big.recording{border-color:#f87171;background:rgba(248,113,113,0.15);color:#f87171;box-shadow:0 0 24px rgba(248,113,113,0.5);animation:pulse 1s infinite;}
+  .mic-label{color:rgba(245,200,66,0.5);font-size:9px;letter-spacing:2px;}
+  .mic-label.recording{color:#f87171;}
+  /* VAD indicator */
+  .vad-bar{display:flex;gap:3px;align-items:flex-end;height:20px;}
+  .vad-dot{width:4px;background:rgba(245,200,66,0.3);border-radius:2px;transition:height .1s;}
+  /* File bar */
   .file-bar{display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap;}
-  .file-btn{background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.25);border-radius:8px;padding:6px 12px;color:rgba(245,200,66,0.7);font-size:10px;cursor:pointer;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px;transition:all .2s;}
-  .file-btn:hover{background:rgba(245,200,66,0.15);color:#f5c842;}
+  .file-btn{background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.25);border-radius:8px;padding:6px 12px;color:rgba(245,200,66,0.7);font-size:10px;cursor:pointer;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
   .file-chip{background:rgba(245,200,66,0.12);border:1px solid rgba(245,200,66,0.3);border-radius:6px;padding:3px 8px;font-size:10px;color:#f5c842;display:flex;align-items:center;gap:5px;}
   .file-chip span{cursor:pointer;opacity:.6;}
-  .file-chip span:hover{opacity:1;}
   #file-input{display:none;}
-  .chat-panel{background:rgba(10,15,28,0.88);border:1px solid rgba(245,200,66,0.18);border-radius:16px;display:flex;flex-direction:column;height:300px;}
+  .chat-panel{background:rgba(10,15,28,0.88);border:1px solid rgba(245,200,66,0.18);border-radius:16px;display:flex;flex-direction:column;height:280px;}
   .messages{flex:1;overflow-y:auto;padding:14px;}
   .messages::-webkit-scrollbar{width:4px;}
   .messages::-webkit-scrollbar-thumb{background:rgba(245,200,66,0.3);border-radius:2px;}
@@ -65,7 +71,7 @@
   #text-input:focus{outline:none;border-color:rgba(245,200,66,0.5);}
   .send-btn{width:44px;height:44px;border-radius:10px;border:1px solid #f5c842;background:linear-gradient(135deg,rgba(245,200,66,0.3),rgba(245,200,66,0.1));color:#f5c842;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .send-btn:disabled{opacity:.35;cursor:not-allowed;}
-  .stop-btn{width:44px;height:44px;border-radius:10px;border:1px solid #f87171;background:rgba(248,113,113,0.15);color:#f87171;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;display:none;}
+  .stop-btn{width:44px;height:44px;border-radius:10px;border:1px solid #f87171;background:rgba(248,113,113,0.15);color:#f87171;font-size:18px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;display:none;}
   .voice-toggle{background:none;border:1px solid rgba(245,200,66,0.2);border-radius:6px;padding:3px 9px;color:rgba(245,200,66,0.5);font-size:9px;cursor:pointer;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
   .voice-toggle.on{color:#f5c842;border-color:rgba(245,200,66,0.5);}
   .footer{color:rgba(245,200,66,0.15);font-size:8px;letter-spacing:3px;text-align:center;padding:12px 0 20px;font-family:'Orbitron',monospace;}
@@ -98,7 +104,7 @@
     <p>Inserisci le API key per attivare il sistema. Vengono salvate solo nel tuo browser.</p>
     <div class="key-label">ANTHROPIC API KEY (cervello AI)</div>
     <input type="password" class="key-input" id="anthropic-key" placeholder="sk-ant-api03-..." />
-    <div class="key-label">OPENAI API KEY (voce Onyx)</div>
+    <div class="key-label">OPENAI API KEY (Whisper + voce Onyx)</div>
     <input type="password" class="key-input" id="openai-key" placeholder="sk-..." />
     <button id="activate-btn" onclick="saveKeys()">⚡ ATTIVA JARVIS</button>
     <div class="error-msg" id="error-msg"></div>
@@ -109,14 +115,24 @@
     <canvas id="sphere" width="280" height="280"></canvas>
   </div>
   <div class="hint" id="hint">CONFIGURA LE API KEY PER ATTIVARE</div>
-  <div class="mic-bar" id="mic-bar" style="display:none;">
-    <span class="mic-label" id="mic-label">🎙️ PRONTO</span>
+
+  <!-- MIC BUTTON -->
+  <div class="mic-section" id="mic-section" style="display:none;">
+    <button class="mic-big" id="mic-big" onmousedown="startRecording()" onmouseup="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()">🎙️</button>
+    <div class="vad-bar" id="vad-bar">
+      <div class="vad-dot" style="height:4px"></div>
+      <div class="vad-dot" style="height:8px"></div>
+      <div class="vad-dot" style="height:14px"></div>
+      <div class="vad-dot" style="height:8px"></div>
+      <div class="vad-dot" style="height:4px"></div>
+    </div>
+    <span class="mic-label" id="mic-label">TIENI PREMUTO PER PARLARE</span>
   </div>
 
   <!-- File upload -->
   <div class="file-bar" id="file-bar" style="display:none;">
     <button class="file-btn" onclick="document.getElementById('file-input').click()">📎 CARICA FILE KUROKAI</button>
-    <input type="file" id="file-input" accept=".txt,.pdf,.md" multiple onchange="handleFiles(event)" />
+    <input type="file" id="file-input" accept=".txt,.md" multiple onchange="handleFiles(event)" />
     <div id="file-chips"></div>
   </div>
 
@@ -128,12 +144,12 @@
       </div>
     </div>
     <div class="input-area">
-      <textarea id="text-input" rows="1" placeholder="Scrivi a JARVIS o parla direttamente..." onkeydown="handleKey(event)" disabled></textarea>
+      <textarea id="text-input" rows="1" placeholder="Scrivi a JARVIS..." onkeydown="handleKey(event)" disabled></textarea>
       <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>⚡</button>
-      <button class="stop-btn" id="stop-btn" onclick="stopJarvis()" title="Interrompi">⏹</button>
+      <button class="stop-btn" id="stop-btn" onclick="stopJarvis()">⏹</button>
     </div>
   </div>
-  <div class="footer">POWERED BY CLAUDE + OPENAI ONYX · NEURAL CORE v3.2 · ANDREA SYSTEMS</div>
+  <div class="footer">POWERED BY CLAUDE + OPENAI WHISPER + ONYX · NEURAL CORE v4.0 · ANDREA SYSTEMS</div>
 </div>
 
 <script>
@@ -143,15 +159,18 @@ let messages = [];
 let status = 'idle';
 let voiceEnabled = true;
 let isProcessing = false;
-let recognition = null;
 let currentAudio = null;
-let keepAliveCtx = null;
-let uploadedFiles = {}; // filename -> text content
+let mediaRecorder = null;
+let audioChunks = [];
+let audioStream = null;
+let analyser = null;
+let vadInterval = null;
+let uploadedFiles = {};
 
-const SYSTEM_BASE = `Sei JARVIS, l'assistente AI personale di Andrea. Parli in italiano. Sei ispirato all'AI di Iron Man: preciso, intelligente, leggermente formale ma caldo, con un tocco di ironia britannica. Chiama sempre Andrea per nome, mai "Sir".
+const SYSTEM_BASE = `Sei JARVIS, l'assistente AI personale di Andrea. Parli in italiano. Sei ispirato all'AI di Iron Man: preciso, intelligente, leggermente formale ma caldo, con un tocco di ironia britannica. Chiama Andrea per nome, mai "Sir".
 
 Puoi aiutare Andrea con:
-- Creare prompt dettagliati per le pagine del suo manga KUROKAI (progetto originale con personaggi Nova, Iris, Kairo, Yuna, Yue e il gatto nero Kuro dagli occhi viola)
+- Creare prompt dettagliati per le pagine del suo manga KUROKAI (personaggi: Nova, Iris, Kairo, Yuna, Yue, gatto nero Kuro occhi viola)
 - Sviluppare trame, dialoghi, personaggi per KUROKAI
 - Trovare lavoro: CV, lettere di presentazione, preparazione colloqui
 - Qualsiasi domanda quotidiana, creatività, brainstorming, analisi
@@ -160,10 +179,8 @@ Rispondi SEMPRE in italiano. Per risposte vocali sii conciso (max 3-4 frasi). Sc
 
 function getSystemPrompt() {
   if (Object.keys(uploadedFiles).length === 0) return SYSTEM_BASE;
-  const filesContext = Object.entries(uploadedFiles)
-    .map(([name, content]) => `\n\n--- FILE: ${name} ---\n${content.substring(0, 8000)}`)
-    .join('');
-  return SYSTEM_BASE + '\n\nCONTENUTO DEI FILE CARICATI DA ANDREA:' + filesContext;
+  const ctx = Object.entries(uploadedFiles).map(([n,c])=>`\n\n--- FILE: ${n} ---\n${c.substring(0,8000)}`).join('');
+  return SYSTEM_BASE + '\n\nFILE CARICATI DA ANDREA:' + ctx;
 }
 
 initSphere();
@@ -172,131 +189,148 @@ if (anthropicKey && openaiKey) activateJarvis();
 function saveKeys() {
   const ak = document.getElementById('anthropic-key').value.trim();
   const ok = document.getElementById('openai-key').value.trim();
-  if (!ak.startsWith('sk-ant-')) { showError('API key Anthropic non valida (sk-ant-...)'); return; }
-  if (!ok.startsWith('sk-')) { showError('API key OpenAI non valida (sk-...)'); return; }
+  if (!ak.startsWith('sk-ant-')) { showError('API key Anthropic non valida'); return; }
+  if (!ok.startsWith('sk-')) { showError('API key OpenAI non valida'); return; }
   anthropicKey = ak; openaiKey = ok;
   localStorage.setItem('jarvis_anthropic', ak);
   localStorage.setItem('jarvis_openai', ok);
   activateJarvis();
 }
 
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.textContent = msg; el.style.display = 'block';
-}
+function showError(msg) { const e=document.getElementById('error-msg'); e.textContent=msg; e.style.display='block'; }
 
-function activateJarvis() {
+async function activateJarvis() {
   document.getElementById('setup-panel').style.display = 'none';
   document.getElementById('send-btn').disabled = false;
   document.getElementById('text-input').disabled = false;
-  document.getElementById('mic-bar').style.display = 'flex';
+  document.getElementById('mic-section').style.display = 'flex';
   document.getElementById('file-bar').style.display = 'flex';
   setStatus('online');
-  setHint('JARVIS ATTIVO — PARLA LIBERAMENTE');
-  addMessage('assistant', 'Sistema attivato, Sir. Sono JARVIS. Posso aiutarti con KUROKAI, trovare lavoro, o qualsiasi cosa tu abbia in mente. Come posso assisterti?');
-  speak('Sistema attivato, Sir. Sono JARVIS. Come posso assisterti?');
-  startKeepAlive();
-  startListening();
-}
-
-// ─── Keep-alive audio (evita che Chrome spenga il mic) ────────────────────
-function startKeepAlive() {
+  setHint('TIENI PREMUTO IL MICROFONO E PARLA');
+  addMessage('assistant', 'Sistema attivato. Sono JARVIS, il tuo assistente personale. Tieni premuto il microfono e parlami, Andrea. Come posso assisterti?');
+  speak('Sistema attivato. Sono JARVIS. Tieni premuto il microfono e parlami, Andrea.');
+  // Init mic stream in anticipo
   try {
-    keepAliveCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = keepAliveCtx.createOscillator();
-    const gainNode = keepAliveCtx.createGain();
-    gainNode.gain.value = 0; // silenzioso
-    oscillator.connect(gainNode);
-    gainNode.connect(keepAliveCtx.destination);
-    oscillator.start();
-  } catch(e) {}
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    initVAD(audioStream);
+  } catch(e) {
+    setHint('⚠️ Abilita microfono nelle impostazioni del browser');
+  }
 }
 
+// ─── VAD visualizer ───────────────────────────────────────────────────────
+function initVAD(stream) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaStreamSource(stream);
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 32;
+  src.connect(analyser);
+  const dots = document.querySelectorAll('.vad-dot');
+  vadInterval = setInterval(() => {
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+    const avg = data.reduce((a,b)=>a+b,0)/data.length;
+    dots.forEach((d,i) => {
+      const h = Math.max(3, Math.min(20, (avg/255)*20 + Math.random()*4));
+      d.style.height = h + 'px';
+      d.style.background = status==='recording' ? '#f87171' : 'rgba(245,200,66,0.4)';
+    });
+  }, 100);
+}
+
+// ─── Recording (push-to-talk) ─────────────────────────────────────────────
+async function startRecording() {
+  if (isProcessing || !audioStream) return;
+  audioChunks = [];
+  const btn = document.getElementById('mic-big');
+  const lbl = document.getElementById('mic-label');
+  btn.className = 'mic-big recording';
+  lbl.textContent = '🔴 STO REGISTRANDO...';
+  lbl.className = 'mic-label recording';
+  setStatus('recording');
+
+  mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+  mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+  mediaRecorder.start(100);
+}
+
+async function stopRecording() {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  const btn = document.getElementById('mic-big');
+  const lbl = document.getElementById('mic-label');
+  btn.className = 'mic-big';
+  lbl.textContent = '⚡ TRASCRIVO...';
+  lbl.className = 'mic-label';
+
+  mediaRecorder.stop();
+  await new Promise(r => mediaRecorder.onstop = r);
+
+  if (audioChunks.length === 0) { lbl.textContent = 'TIENI PREMUTO PER PARLARE'; setStatus('online'); return; }
+
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  if (blob.size < 1000) { lbl.textContent = 'TIENI PREMUTO PER PARLARE'; setStatus('online'); return; }
+
+  // Trascrivi con Whisper
+  setStatus('thinking');
+  try {
+    const formData = new FormData();
+    formData.append('file', blob, 'audio.webm');
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'it');
+
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + openaiKey },
+      body: formData
+    });
+    const data = await res.json();
+    const transcript = data.text?.trim();
+    lbl.textContent = 'TIENI PREMUTO PER PARLARE';
+    if (transcript) {
+      sendMessage(transcript);
+    } else {
+      setStatus('online');
+    }
+  } catch(err) {
+    lbl.textContent = 'TIENI PREMUTO PER PARLARE';
+    addMessage('assistant', '⚠️ Errore trascrizione: ' + err.message);
+    setStatus('online');
+  }
+}
+
+// ─── Status ───────────────────────────────────────────────────────────────
 function setStatus(s) {
   status = s;
   const dot = document.getElementById('status-dot');
   const txt = document.getElementById('status-text');
   dot.className = 'status-dot ' + (s !== 'online' ? s : '');
-  const map = {online:'ONLINE',listening:'IN ASCOLTO',thinking:'ELABORO...',speaking:'RISPONDO',idle:'OFFLINE'};
-  const colors = {online:'#4ade80',listening:'#f87171',thinking:'#f5c842',speaking:'#60a5fa',idle:'#6b7280'};
+  const map = {online:'ONLINE',recording:'ASCOLTO',thinking:'ELABORO...',speaking:'RISPONDO',idle:'OFFLINE'};
+  const colors = {online:'#4ade80',recording:'#f87171',thinking:'#f5c842',speaking:'#60a5fa',idle:'#6b7280'};
   txt.textContent = map[s]||'ONLINE';
   txt.style.color = colors[s]||'#4ade80';
-  const ml = document.getElementById('mic-label');
-  if(ml){const mlmap={online:'🎙️ PRONTO',listening:'🔴 IN ASCOLTO',thinking:'⚡ ELABORO...',speaking:'🔊 RISPONDO'};ml.textContent=mlmap[s]||'🎙️ PRONTO';}
-  // Mostra/nascondi stop button
   const stopBtn = document.getElementById('stop-btn');
   const sendBtn = document.getElementById('send-btn');
-  if(s === 'speaking' || s === 'thinking') {
-    stopBtn.style.display = 'flex'; sendBtn.style.display = 'none';
-  } else {
-    stopBtn.style.display = 'none'; sendBtn.style.display = 'flex';
-  }
+  if(s==='speaking'||s==='thinking'){stopBtn.style.display='flex';sendBtn.style.display='none';}
+  else{stopBtn.style.display='none';sendBtn.style.display='flex';}
 }
 
 function setHint(t){document.getElementById('hint').textContent=t;}
 
-// ─── Stop JARVIS ──────────────────────────────────────────────────────────
 function stopJarvis() {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
   window.speechSynthesis?.cancel();
-  isProcessing = false;
-  setStatus('online');
-  startListening();
-  addMessage('assistant', '— Interrotto.');
-}
-
-// ─── File handling ────────────────────────────────────────────────────────
-async function handleFiles(event) {
-  const files = Array.from(event.target.files);
-  for (const file of files) {
-    if (file.type === 'application/pdf') {
-      // Leggi PDF come testo base (senza librerie esterne)
-      const text = await readFileAsText(file);
-      uploadedFiles[file.name] = text;
-    } else {
-      const text = await readFileAsText(file);
-      uploadedFiles[file.name] = text;
-    }
-    renderFileChip(file.name);
-  }
-  addMessage('assistant', `File caricato: ${files.map(f=>f.name).join(', ')}. Ho accesso al contenuto, Sir.`);
-  event.target.value = '';
-}
-
-function readFileAsText(file) {
-  return new Promise((res) => {
-    const reader = new FileReader();
-    reader.onload = e => res(e.target.result);
-    reader.onerror = () => res('');
-    reader.readAsText(file);
-  });
-}
-
-function renderFileChip(name) {
-  const chips = document.getElementById('file-chips');
-  const chip = document.createElement('div');
-  chip.className = 'file-chip';
-  chip.id = 'chip-' + name;
-  chip.innerHTML = `📄 ${name.length > 15 ? name.substring(0,15)+'...' : name} <span onclick="removeFile('${name}')">✕</span>`;
-  chips.appendChild(chip);
-}
-
-function removeFile(name) {
-  delete uploadedFiles[name];
-  const chip = document.getElementById('chip-' + name);
-  if(chip) chip.remove();
+  isProcessing=false; setStatus('online');
+  addMessage('assistant','— Interrotto.');
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────
 function addMessage(role, content) {
-  messages.push({role, content});
-  const c = document.getElementById('messages');
-  const w = document.createElement('div');
-  w.className = 'bubble-wrap ' + role;
-  w.innerHTML = role === 'assistant'
-    ? `<div class="avatar">J</div><div class="bubble assistant">${escHtml(content)}</div>`
-    : `<div class="bubble user">${escHtml(content)}</div>`;
-  c.appendChild(w); c.scrollTop = c.scrollHeight;
+  messages.push({role,content});
+  const c=document.getElementById('messages');
+  const w=document.createElement('div');
+  w.className='bubble-wrap '+role;
+  w.innerHTML=role==='assistant'?`<div class="avatar">J</div><div class="bubble assistant">${escHtml(content)}</div>`:`<div class="bubble user">${escHtml(content)}</div>`;
+  c.appendChild(w);c.scrollTop=c.scrollHeight;
 }
 function showTyping(){const c=document.getElementById('messages');const w=document.createElement('div');w.className='bubble-wrap assistant';w.id='typing-indicator';w.innerHTML='<div class="avatar">J</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';c.appendChild(w);c.scrollTop=c.scrollHeight;}
 function hideTyping(){const e=document.getElementById('typing-indicator');if(e)e.remove();}
@@ -312,19 +346,15 @@ async function sendMessage(voiceText) {
   isProcessing = true;
   setStatus('thinking');
   showTyping();
-
   try {
     let res;
     const body = JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1024,system:getSystemPrompt(),messages:messages.slice(-20)});
     const headers = {'Content-Type':'application/json','x-api-key':anthropicKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
-    try {
-      res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body});
-    } catch(e) {
-      res = await fetch('https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'),{method:'POST',headers,body});
-    }
+    try { res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body}); }
+    catch(e) { res = await fetch('https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'),{method:'POST',headers,body}); }
     const data = await res.json();
     hideTyping();
-    if(data.error){addMessage('assistant','⚠️ '+data.error.message);isProcessing=false;setStatus('online');startListening();return;}
+    if(data.error){addMessage('assistant','⚠️ '+data.error.message);isProcessing=false;setStatus('online');return;}
     const reply = data.content?.[0]?.text||'Nessuna risposta.';
     addMessage('assistant', reply);
     setStatus('speaking');
@@ -332,7 +362,7 @@ async function sendMessage(voiceText) {
   } catch(err) {
     hideTyping();
     addMessage('assistant','⚠️ Errore: '+err.message);
-    isProcessing=false;setStatus('online');startListening();
+    isProcessing=false;setStatus('online');
   }
 }
 
@@ -340,32 +370,23 @@ function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMe
 
 // ─── OpenAI TTS ───────────────────────────────────────────────────────────
 async function speak(text) {
-  if(!voiceEnabled){isProcessing=false;setStatus('online');startListening();return;}
-  const clean = text.replace(/<br>/g,' ').replace(/[⚠️]/g,'').trim();
-  const toSpeak = clean.length>600?clean.substring(0,600)+'.':clean;
+  if(!voiceEnabled){isProcessing=false;setStatus('online');return;}
+  const clean=text.replace(/<br>/g,' ').replace(/[⚠️]/g,'').trim();
+  const toSpeak=clean.length>600?clean.substring(0,600)+'.':clean;
   try {
-    const res = await fetch('https://api.openai.com/v1/audio/speech',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+openaiKey},
-      body:JSON.stringify({model:'tts-1',input:toSpeak,voice:'onyx',speed:1.0})
-    });
-    if(!res.ok) throw new Error('TTS error '+res.status);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    currentAudio = new Audio(url);
-    currentAudio.onended = ()=>{URL.revokeObjectURL(url);currentAudio=null;isProcessing=false;setStatus('online');startListening();};
-    currentAudio.onerror = ()=>{currentAudio=null;isProcessing=false;setStatus('online');startListening();};
+    const res=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+openaiKey},body:JSON.stringify({model:'tts-1',input:toSpeak,voice:'onyx',speed:1.0})});
+    if(!res.ok) throw new Error('TTS '+res.status);
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    currentAudio=new Audio(url);
+    currentAudio.onended=()=>{URL.revokeObjectURL(url);currentAudio=null;isProcessing=false;setStatus('online');};
+    currentAudio.onerror=()=>{currentAudio=null;isProcessing=false;setStatus('online');};
     currentAudio.play();
   } catch(err) {
-    const synth = window.speechSynthesis;
-    synth.cancel();
-    const utter = new SpeechSynthesisUtterance(toSpeak);
-    utter.lang='it-IT';utter.rate=1.0;utter.pitch=0.8;
-    const voices=synth.getVoices();
-    const v=voices.find(v=>v.lang==='it-IT')||null;
-    if(v)utter.voice=v;
-    utter.onend=()=>{isProcessing=false;setStatus('online');startListening();};
-    synth.speak(utter);
+    const synth=window.speechSynthesis;synth.cancel();
+    const u=new SpeechSynthesisUtterance(toSpeak);u.lang='it-IT';u.rate=1.0;u.pitch=0.8;
+    const v=synth.getVoices().find(v=>v.lang==='it-IT')||null;if(v)u.voice=v;
+    u.onend=()=>{isProcessing=false;setStatus('online');};synth.speak(u);
   }
 }
 
@@ -376,87 +397,45 @@ function toggleVoice(){
   btn.className='voice-toggle '+(voiceEnabled?'on':'');
 }
 
-// ─── Always-on mic con keep-alive ─────────────────────────────────────────
-function startListening() {
-  if(isProcessing) return;
-  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){setHint('⚠️ Microfono richiede Chrome');return;}
-  if(recognition){try{recognition.abort();}catch(e){}}
-
-  recognition = new SR();
-  recognition.lang = 'it-IT';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = ()=>{ if(!isProcessing) setStatus('listening'); };
-
-  recognition.onresult = (e)=>{
-    const t = e.results[0][0].transcript.trim();
-    if(t && !isProcessing) sendMessage(t);
-  };
-
-  recognition.onerror = (e)=>{
-    if(e.error==='not-allowed'){setHint('⚠️ Abilita microfono: clicca 🔒 URL → Microfono → Consenti');return;}
-    if(!isProcessing) setTimeout(()=>startListening(), 800);
-  };
-
-  recognition.onend = ()=>{
-    if(!isProcessing) setTimeout(()=>startListening(), 300);
-  };
-
-  // Resume AudioContext se sospeso (keep-alive)
-  if(keepAliveCtx && keepAliveCtx.state === 'suspended') keepAliveCtx.resume();
-
-  try { recognition.start(); } catch(e){ setTimeout(()=>startListening(),1000); }
+// ─── Files ────────────────────────────────────────────────────────────────
+async function handleFiles(e) {
+  for(const f of Array.from(e.target.files)){
+    const text=await f.text();uploadedFiles[f.name]=text;
+    const chips=document.getElementById('file-chips');
+    const chip=document.createElement('div');chip.className='file-chip';chip.id='chip-'+f.name;
+    chip.innerHTML=`📄 ${f.name.length>15?f.name.substring(0,15)+'...':f.name} <span onclick="removeFile('${f.name}')">✕</span>`;
+    chips.appendChild(chip);
+  }
+  addMessage('assistant',`File caricato: ${Array.from(e.target.files).map(f=>f.name).join(', ')}. Contenuto disponibile.`);
+  e.target.value='';
 }
+function removeFile(n){delete uploadedFiles[n];const c=document.getElementById('chip-'+n);if(c)c.remove();}
 
 // ─── Sphere ───────────────────────────────────────────────────────────────
 function initSphere(){
   const canvas=document.getElementById('sphere');
   const ctx=canvas.getContext('2d');
   const W=280,H=280,cx=140,cy=140,R=95,N=88;
-  const nodes=Array.from({length:N},(_,i)=>{
-    const phi=Math.acos(1-2*(i+.5)/N),theta=Math.PI*(1+Math.sqrt(5))*i;
-    return{ox:Math.sin(phi)*Math.cos(theta),oy:Math.sin(phi)*Math.sin(theta),oz:Math.cos(phi),phase:Math.random()*Math.PI*2,speed:.4+Math.random()*.6};
-  });
+  const nodes=Array.from({length:N},(_,i)=>{const phi=Math.acos(1-2*(i+.5)/N),theta=Math.PI*(1+Math.sqrt(5))*i;return{ox:Math.sin(phi)*Math.cos(theta),oy:Math.sin(phi)*Math.sin(theta),oz:Math.cos(phi),phase:Math.random()*Math.PI*2,speed:.4+Math.random()*.6};});
   let t=0;
   const draw=()=>{
     t+=.012;
-    const isSp=status==='speaking',isAc=status==='thinking'||status==='listening';
+    const isSp=status==='speaking',isAc=status==='thinking'||status==='recording';
     ctx.clearRect(0,0,W,H);
     const pulse=isSp?1+.4*Math.sin(t*6):isAc?1+.2*Math.sin(t*3):1;
     const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.6*pulse);
-    grd.addColorStop(0,`rgba(245,200,66,${isSp?.22:isAc?.12:.06})`);
+    grd.addColorStop(0,`rgba(${isAc&&status==='recording'?'248,113,113':'245,200,66'},${isSp?.22:isAc?.12:.06})`);
     grd.addColorStop(1,'transparent');
     ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
     const ry=t*.22,rx=Math.sin(t*.11)*.3;
-    const proj=nodes.map(n=>{
-      let x=n.ox*Math.cos(ry)-n.oz*Math.sin(ry);
-      let z=n.ox*Math.sin(ry)+n.oz*Math.cos(ry);
-      let y2=n.oy*Math.cos(rx)-z*Math.sin(rx);
-      let z2=n.oy*Math.sin(rx)+z*Math.cos(rx);
-      const b=(z2+1)/2;
-      const fl=isSp?Math.sin(t*n.speed*8+n.phase)*10:isAc?Math.sin(t*n.speed*4+n.phase)*4:0;
-      return{sx:cx+x*(R+fl),sy:cy+y2*(R+fl),b};
-    });
-    for(let i=0;i<proj.length;i++)for(let j=i+1;j<proj.length;j++){
-      const a=proj[i],b=proj[j],dx=a.sx-b.sx,dy=a.sy-b.sy,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<60){ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.strokeStyle=`rgba(245,200,66,${(1-d/60)*.55*((a.b+b.b)/2)})`;ctx.lineWidth=.7;ctx.stroke();}
-    }
-    proj.forEach(p=>{
-      const r=isSp?2.8+p.b*2:1.8+p.b*1.5;
-      ctx.beginPath();ctx.arc(p.sx,p.sy,r,0,Math.PI*2);ctx.fillStyle=`rgba(255,230,120,${.5+p.b*.5})`;ctx.fill();
-      if(p.b>.75){ctx.beginPath();ctx.arc(p.sx,p.sy,r*2.2,0,Math.PI*2);ctx.fillStyle='rgba(245,200,66,.12)';ctx.fill();}
-    });
+    const proj=nodes.map(n=>{let x=n.ox*Math.cos(ry)-n.oz*Math.sin(ry);let z=n.ox*Math.sin(ry)+n.oz*Math.cos(ry);let y2=n.oy*Math.cos(rx)-z*Math.sin(rx);let z2=n.oy*Math.sin(rx)+z*Math.cos(rx);const b=(z2+1)/2;const fl=isSp?Math.sin(t*n.speed*8+n.phase)*10:isAc?Math.sin(t*n.speed*4+n.phase)*4:0;return{sx:cx+x*(R+fl),sy:cy+y2*(R+fl),b};});
+    for(let i=0;i<proj.length;i++)for(let j=i+1;j<proj.length;j++){const a=proj[i],b=proj[j],dx=a.sx-b.sx,dy=a.sy-b.sy,d=Math.sqrt(dx*dx+dy*dy);if(d<60){ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.strokeStyle=`rgba(245,200,66,${(1-d/60)*.55*((a.b+b.b)/2)})`;ctx.lineWidth=.7;ctx.stroke();}}
+    proj.forEach(p=>{const r=isSp?2.8+p.b*2:1.8+p.b*1.5;ctx.beginPath();ctx.arc(p.sx,p.sy,r,0,Math.PI*2);ctx.fillStyle=`rgba(255,230,120,${.5+p.b*.5})`;ctx.fill();if(p.b>.75){ctx.beginPath();ctx.arc(p.sx,p.sy,r*2.2,0,Math.PI*2);ctx.fillStyle='rgba(245,200,66,.12)';ctx.fill();}});
     canvas.style.filter=`drop-shadow(0 0 ${isSp?45:isAc?25:16}px rgba(245,200,66,${isSp?.8:.32}))`;
     requestAnimationFrame(draw);
   };
   draw();
 }
-
-// Resume AudioContext on user interaction
-document.addEventListener('click', ()=>{ if(keepAliveCtx&&keepAliveCtx.state==='suspended') keepAliveCtx.resume(); });
 </script>
 </body>
 </html>
